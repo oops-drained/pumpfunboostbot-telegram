@@ -43,11 +43,12 @@ from bot.solana_wallet import (
 from bot.texts import (
     TRENDING_MENU_TEXT,
     VOLUME_MENU_TEXT,
-    WELCOME_CAPTION,
     bump_menu_text,
     enter_ca_text,
+    help_text,
     payment_text,
     token_details_text,
+    welcome_caption,
 )
 from bot.token_lookup import fetch_token_info
 
@@ -129,6 +130,30 @@ async def _send_menu(
         )
 
 
+async def _reply_or_edit(query, text: str, *, link_preview: bool = False) -> None:
+    markup = back_main_keyboard()
+    if query.message and query.message.photo:
+        chat_id = query.message.chat_id
+        try:
+            await query.message.delete()
+        except Exception:
+            pass
+        await query.get_bot().send_message(
+            chat_id=chat_id,
+            text=text,
+            parse_mode=ParseMode.HTML,
+            reply_markup=markup,
+            disable_web_page_preview=not link_preview,
+        )
+    else:
+        await query.edit_message_text(
+            text,
+            parse_mode=ParseMode.HTML,
+            reply_markup=markup,
+            disable_web_page_preview=not link_preview,
+        )
+
+
 def _clear_flow(context: ContextTypes.DEFAULT_TYPE) -> None:
     for key in (
         "flow_kind",
@@ -148,47 +173,21 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await _send_menu(
         update,
         context,
-        text=WELCOME_CAPTION,
+        text=welcome_caption(),
         keyboard=main_menu_keyboard(),
         banner="banner",
     )
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await start(update, context)
-
-
-async def bump_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     _clear_flow(context)
-    await _send_menu(
-        update,
-        context,
-        text=bump_menu_text(),
-        keyboard=bump_packages_keyboard(),
-        banner="banner",
-    )
-
-
-async def volume_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    _clear_flow(context)
-    await _send_menu(
-        update,
-        context,
-        text=VOLUME_MENU_TEXT,
-        keyboard=volume_packages_keyboard(),
-        banner="volume",
-    )
-
-
-async def trending_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    _clear_flow(context)
-    await _send_menu(
-        update,
-        context,
-        text=TRENDING_MENU_TEXT,
-        keyboard=trending_packages_keyboard(),
-        banner="trending",
-    )
+    if update.message:
+        await update.message.reply_text(
+            help_text(),
+            parse_mode=ParseMode.HTML,
+            reply_markup=back_main_keyboard(),
+            disable_web_page_preview=False,
+        )
 
 
 async def on_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -203,10 +202,15 @@ async def on_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         await _send_menu(
             update,
             context,
-            text=WELCOME_CAPTION,
+            text=welcome_caption(),
             keyboard=main_menu_keyboard(),
             banner="banner",
         )
+        return
+
+    if data == "menu:help":
+        _clear_flow(context)
+        await _reply_or_edit(query, help_text(), link_preview=True)
         return
 
     if data == "menu:bump":
@@ -216,7 +220,7 @@ async def on_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             context,
             text=bump_menu_text(),
             keyboard=bump_packages_keyboard(),
-            banner="banner",
+            banner="bump",
         )
         return
 
@@ -243,27 +247,26 @@ async def on_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         return
 
     if data == "menu:deposit":
-        await query.edit_message_text(
-            text=(
-                "💰 <b>Deposit / Balance</b>\n\n"
-                "This bot uses <b>per-order one-time wallets</b>.\n"
-                "Select a package and pay the generated address — no manual deposit needed.\n\n"
-                f"Treasury wallet: <code>{get_main_wallet()}</code>"
+        await _reply_or_edit(
+            query,
+            (
+                "💰 <b>Payments</b>\n\n"
+                "No manual deposit needed.\n"
+                "Each order creates a <b>unique Solana wallet</b> at checkout.\n\n"
+                "Pay the exact amount shown. We verify on chain automatically."
             ),
-            parse_mode=ParseMode.HTML,
-            reply_markup=back_main_keyboard(),
         )
         return
 
     if data == "menu:wallet":
-        await query.edit_message_text(
-            text=(
-                "🔗 <b>Connect Wallet</b>\n\n"
-                "Wallet connect is coming soon.\n"
-                "For now, pay via the <b>one-time Solana address</b> shown at checkout."
+        await _reply_or_edit(
+            query,
+            (
+                "🔗 <b>Wallet connect</b>\n\n"
+                "Coming soon.\n\n"
+                "For now checkout uses a <b>one time payment address</b> per order. "
+                "We never ask for your seed phrase."
             ),
-            parse_mode=ParseMode.HTML,
-            reply_markup=back_main_keyboard(),
         )
         return
 
@@ -272,7 +275,7 @@ async def on_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         await _send_menu(
             update,
             context,
-            text="❌ Cancelled.\n\n" + WELCOME_CAPTION,
+            text="❌ Cancelled.\n\n" + welcome_caption(),
             keyboard=main_menu_keyboard(),
             banner="banner",
         )
@@ -470,9 +473,6 @@ async def _handle_tx_submission(
 
 def register_handlers(application: Application) -> None:
     application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("bump", bump_command))
-    application.add_handler(CommandHandler("volume", volume_command))
-    application.add_handler(CommandHandler("trending", trending_command))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CallbackQueryHandler(on_callback))
     application.add_handler(

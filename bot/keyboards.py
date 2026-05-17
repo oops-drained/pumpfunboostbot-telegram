@@ -14,7 +14,7 @@ from bot.packages import (
 def main_menu_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         [
-            [InlineKeyboardButton("🟢 Start Bumping", callback_data="menu:bump")],
+            [InlineKeyboardButton("🟢 Token Bumping", callback_data="menu:bump")],
             [
                 InlineKeyboardButton("📈 Chart Volume", callback_data="menu:volume"),
                 InlineKeyboardButton("🔝 Trend Push", callback_data="menu:trending"),
@@ -23,8 +23,11 @@ def main_menu_keyboard() -> InlineKeyboardMarkup:
                 InlineKeyboardButton("🌐 DexScreener", url=get_dexscreener_url()),
                 InlineKeyboardButton("💰 Deposit", callback_data="menu:deposit"),
             ],
-            [InlineKeyboardButton("🔗 Connect Wallet", callback_data="menu:wallet")],
-            [InlineKeyboardButton("💬 Contact Support", url=get_support_url())],
+            [InlineKeyboardButton("ℹ️ How it works", callback_data="menu:help")],
+            [
+                InlineKeyboardButton("🔗 Connect Wallet", callback_data="menu:wallet"),
+                InlineKeyboardButton("💬 Support", url=get_support_url()),
+            ],
         ]
     )
 

@@ -160,9 +160,12 @@ def get_package(kind: str, package_id: str) -> Package | None:
 
 
 def format_volume_menu() -> str:
+    from bot.platforms import compatible_platforms_html
+
     lines = [
         "📈 <b>Chart Volume</b>\n",
-        "Synthetic volume packs tuned for Pump.fun charts.\n",
+        "Volume packs for deeper chart presence.\n",
+        f"\n<b>Platforms</b>\n{compatible_platforms_html()}\n",
     ]
     for pid in VOLUME_ORDER:
         p = VOLUME_PACKAGES[pid]
@@ -172,9 +175,12 @@ def format_volume_menu() -> str:
 
 
 def format_trending_menu() -> str:
+    from bot.platforms import compatible_platforms_html
+
     lines = [
         "🔝 <b>Trend Push</b>\n",
-        "Spotlight slots that push visibility across boards.\n",
+        "Trending visibility for Solana tokens.\n",
+        f"\n<b>Platforms</b>\n{compatible_platforms_html()}\n",
     ]
     for pid in TRENDING_ORDER:
         p = TRENDING_PACKAGES[pid]

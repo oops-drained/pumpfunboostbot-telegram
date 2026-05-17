@@ -1,7 +1,8 @@
-Banner images (used automatically by the bot):
+Banner images:
 
   banner.png   — main menu (/start)
-  volume.png   — Chart Volume packages
-  trending.png — Trend Push packages
+  bump.png     — token bumping
+  volume.png   — chart volume
+  trending.png — trend push
 
-These files are included in the Docker image. After updating images, redeploy on Dokploy.
+Redeploy after updating images.
