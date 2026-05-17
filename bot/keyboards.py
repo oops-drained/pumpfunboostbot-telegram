@@ -1,16 +1,21 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from bot.config import get_dexscreener_url, get_support_url
-from bot.packages import TRENDING_PACKAGES, VOLUME_PACKAGES
+from bot.packages import (
+    TRENDING_ORDER,
+    TRENDING_PACKAGES,
+    VOLUME_ORDER,
+    VOLUME_PACKAGES,
+)
 
 
 def main_menu_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         [
-            [InlineKeyboardButton("🟢 Start Bumping", callback_data="menu:start")],
+            [InlineKeyboardButton("🚀 Launch Boost", callback_data="menu:start")],
             [
-                InlineKeyboardButton("📊 Volume Boost", callback_data="menu:volume"),
-                InlineKeyboardButton("🔥 Trending Boost", callback_data="menu:trending"),
+                InlineKeyboardButton("📈 Chart Volume", callback_data="menu:volume"),
+                InlineKeyboardButton("🔝 Trend Push", callback_data="menu:trending"),
             ],
             [
                 InlineKeyboardButton("🌐 DexScreener", url=get_dexscreener_url()),
@@ -22,48 +27,35 @@ def main_menu_keyboard() -> InlineKeyboardMarkup:
     )
 
 
-def volume_packages_keyboard() -> InlineKeyboardMarkup:
-    rows = [
-        [
-            InlineKeyboardButton(VOLUME_PACKAGES["iron"].label, callback_data="pkg:volume:iron"),
-            InlineKeyboardButton(VOLUME_PACKAGES["bronze"].label, callback_data="pkg:volume:bronze"),
-        ],
-        [
-            InlineKeyboardButton(VOLUME_PACKAGES["gold"].label, callback_data="pkg:volume:gold"),
-            InlineKeyboardButton(VOLUME_PACKAGES["platinum"].label, callback_data="pkg:volume:platinum"),
-        ],
-        [
-            InlineKeyboardButton(VOLUME_PACKAGES["silver"].label, callback_data="pkg:volume:silver"),
-            InlineKeyboardButton(VOLUME_PACKAGES["diamond"].label, callback_data="pkg:volume:diamond"),
-        ],
+def _package_rows(kind: str, order: tuple[str, ...], catalog: dict) -> list[list[InlineKeyboardButton]]:
+    pairs = [order[i : i + 2] for i in range(0, len(order), 2)]
+    rows = []
+    for pair in pairs:
+        row = []
+        for pid in pair:
+            pkg = catalog[pid]
+            row.append(
+                InlineKeyboardButton(
+                    pkg.label,
+                    callback_data=f"pkg:{kind}:{pid}",
+                )
+            )
+        rows.append(row)
+    rows.append(
         [
             InlineKeyboardButton("⬅️ Back", callback_data="nav:main"),
             InlineKeyboardButton("🏠 Main Menu", callback_data="nav:main"),
-        ],
-    ]
-    return InlineKeyboardMarkup(rows)
+        ]
+    )
+    return rows
+
+
+def volume_packages_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(_package_rows("volume", VOLUME_ORDER, VOLUME_PACKAGES))
 
 
 def trending_packages_keyboard() -> InlineKeyboardMarkup:
-    rows = [
-        [
-            InlineKeyboardButton(TRENDING_PACKAGES["spark"].label, callback_data="pkg:trending:spark"),
-            InlineKeyboardButton(TRENDING_PACKAGES["pulse"].label, callback_data="pkg:trending:pulse"),
-        ],
-        [
-            InlineKeyboardButton(TRENDING_PACKAGES["surge"].label, callback_data="pkg:trending:surge"),
-            InlineKeyboardButton(TRENDING_PACKAGES["blast"].label, callback_data="pkg:trending:blast"),
-        ],
-        [
-            InlineKeyboardButton(TRENDING_PACKAGES["nova"].label, callback_data="pkg:trending:nova"),
-            InlineKeyboardButton(TRENDING_PACKAGES["apex"].label, callback_data="pkg:trending:apex"),
-        ],
-        [
-            InlineKeyboardButton("⬅️ Back", callback_data="nav:main"),
-            InlineKeyboardButton("🏠 Main Menu", callback_data="nav:main"),
-        ],
-    ]
-    return InlineKeyboardMarkup(rows)
+    return InlineKeyboardMarkup(_package_rows("trending", TRENDING_ORDER, TRENDING_PACKAGES))
 
 
 def cancel_keyboard() -> InlineKeyboardMarkup:

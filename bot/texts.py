@@ -1,56 +1,35 @@
-from bot.packages import Package
+from bot.packages import Package, format_trending_menu, format_volume_menu
 
 
 WELCOME_CAPTION = (
-    "🟢 <b>Welcome to PUMPFUN TREND BOT service!</b>\n\n"
-    "New to volume bots? No worries — we made it super simple!\n\n"
-    "<b>How it works:</b>\n"
-    "1️⃣ Select how much Bumps/volume to use\n"
-    "2️⃣ Pick how long to run and how massive you want your token to pump\n"
-    "3️⃣ Done! Our servers handle the rest automatically\n\n"
-    "<b>Works on:</b>\n"
-    "🟢 Pumpfun · Raydium · PumpSwap · Moonshot · LetsBonk · DexScreener\n\n"
-    "From <b>0.3–10.5 SOL</b> — volume & trending boosts with high stability delivery."
+    "🚀 <b>Pump.fun Boost Hub</b>\n\n"
+    "Stack chart volume or trend heat on your token — setup takes under a minute.\n\n"
+    "<b>Flow:</b>\n"
+    "1️⃣ Pick <b>Chart Volume</b> or <b>Trend Push</b>\n"
+    "2️⃣ Choose a tier & paste your CA\n"
+    "3️⃣ Pay once — nodes spin up automatically\n\n"
+    "<b>Compatible:</b>\n"
+    "Pump.fun · Raydium · PumpSwap · Moonshot · LetsBonk · DexScreener\n\n"
+    "Tiers from <b>◎0.30</b> up to <b>◎10.50</b> — stable delivery, one-time checkout."
 )
 
-
-VOLUME_MENU_TEXT = (
-    "💊 <b>Volume Boost Packages</b>\n\n"
-    "💊 <b>Iron Package</b> — $50,000 Volume\n"
-    "💊 <b>Bronze Package</b> — $250,000 Volume\n"
-    "💊 <b>Gold Package</b> — $100,000 Volume\n"
-    "💊 <b>Silver Package</b> — $1,000,000 Volume\n"
-    "💊 <b>Platinum Package</b> — $500,000 Volume\n"
-    "💊 <b>Diamond Package</b> — $2,500,000 Volume\n\n"
-    "Please select the package below:"
-)
-
-
-TRENDING_MENU_TEXT = (
-    "🔥 <b>Trending Boost Packages</b>\n\n"
-    "⚡ <b>Spark</b> — 30 min trending push (0.30 SOL)\n"
-    "⚡ <b>Pulse</b> — 1 hour trending push (0.40 SOL)\n"
-    "⚡ <b>Surge</b> — 3 hour trending push (0.50 SOL)\n"
-    "⚡ <b>Blast</b> — 6 hour trending push (0.60 SOL)\n"
-    "⚡ <b>Nova</b> — 12 hour trending push (1.20 SOL)\n"
-    "⚡ <b>Apex</b> — 24 hour trending push (2.00 SOL)\n\n"
-    "Pick your trending intensity:"
-)
+VOLUME_MENU_TEXT = format_volume_menu()
+TRENDING_MENU_TEXT = format_trending_menu()
 
 
 def enter_ca_text(pkg: Package, kind: str) -> str:
-    service = "Volume Boost" if kind == "volume" else "Trending Boost"
+    service = "Chart Volume" if kind == "volume" else "Trend Push"
     return (
-        f"📝 <b>Enter Contract Address (CA)</b>\n\n"
-        f"You selected <b>{pkg.name} Package</b> ({pkg.sol:.2f} SOL)\n"
+        f"📝 <b>Drop your Contract Address</b>\n\n"
+        f"Tier: <b>{pkg.emoji} {pkg.name}</b> · <b>{pkg.sol:.2f} SOL</b>\n"
         f"{service}: <b>{pkg.detail}</b>\n\n"
-        "Please enter the <b>Contract Address (CA)</b> of your project:"
+        "Send your token <b>CA (mint)</b> below:"
     )
 
 
 def token_details_text(mint: str, meta: dict, pkg: Package, kind: str) -> str:
     dexes = " • ".join(f"🟢 {d}" for d in meta.get("available_on", []))
-    service = "Volume" if kind == "volume" else "Trending"
+    service = "Chart Volume" if kind == "volume" else "Trend Push"
     return (
         "📋 <b>Project Details Found!</b>\n\n"
         f"📊 <b>{meta.get('name')} ({meta.get('symbol')})</b>\n"
@@ -74,7 +53,7 @@ def token_details_text(mint: str, meta: dict, pkg: Package, kind: str) -> str:
 
 
 def payment_text(order: dict, minutes_left: int) -> str:
-    kind_label = "Volume Boost" if order["kind"] == "volume" else "Trending Boost"
+    kind_label = "Chart Volume" if order["kind"] == "volume" else "Trend Push"
     token_line = f"{order.get('token_name')} ({order.get('token_symbol')})"
     return (
         "💰 <b>Payment Required</b>\n\n"
@@ -99,15 +78,14 @@ def payment_text(order: dict, minutes_left: int) -> str:
 
 
 def success_text(order: dict, sweep_tx: str | None) -> str:
-    kind = "volume boost" if order["kind"] == "volume" else "trending boost"
+    kind = "chart volume" if order["kind"] == "volume" else "trend push"
     tx_line = f"\n🔗 Sweep TX: <code>{sweep_tx}</code>" if sweep_tx else ""
     return (
         "✅ <b>Payment Confirmed!</b>\n\n"
-        f"Your <b>{order['package_name']}</b> {kind} for\n"
-        f"<code>{order['contract_address']}</code>\n"
-        "has been queued.\n\n"
-        "🚀 <b>Status:</b> Processing (delivery simulated — boost engine not required)\n"
-        f"📦 Package: {order['package_detail']}\n"
+        f"<b>{order['package_name']}</b> {kind} locked for\n"
+        f"<code>{order['contract_address']}</code>\n\n"
+        "🚀 <b>Status:</b> Queued on boost nodes\n"
+        f"📦 Tier: {order['package_detail']}\n"
         f"💰 Paid: {order['amount_sol']:.2f} SOL{tx_line}\n\n"
-        "You will receive updates here. Thank you for your order!"
+        "Sit tight — you'll get updates in this chat."
     )
