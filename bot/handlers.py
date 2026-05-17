@@ -28,6 +28,7 @@ from bot.keyboards import (
     confirm_token_keyboard,
     main_menu_keyboard,
     payment_keyboard,
+    bump_packages_keyboard,
     trending_packages_keyboard,
     volume_packages_keyboard,
 )
@@ -43,6 +44,7 @@ from bot.texts import (
     TRENDING_MENU_TEXT,
     VOLUME_MENU_TEXT,
     WELCOME_CAPTION,
+    bump_menu_text,
     enter_ca_text,
     payment_text,
     token_details_text,
@@ -156,6 +158,39 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     await start(update, context)
 
 
+async def bump_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    _clear_flow(context)
+    await _send_menu(
+        update,
+        context,
+        text=bump_menu_text(),
+        keyboard=bump_packages_keyboard(),
+        banner="banner",
+    )
+
+
+async def volume_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    _clear_flow(context)
+    await _send_menu(
+        update,
+        context,
+        text=VOLUME_MENU_TEXT,
+        keyboard=volume_packages_keyboard(),
+        banner="volume",
+    )
+
+
+async def trending_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    _clear_flow(context)
+    await _send_menu(
+        update,
+        context,
+        text=TRENDING_MENU_TEXT,
+        keyboard=trending_packages_keyboard(),
+        banner="trending",
+    )
+
+
 async def on_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     if not query or not query.data:
@@ -163,13 +198,24 @@ async def on_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     await query.answer()
     data = query.data
 
-    if data in ("nav:main", "menu:start"):
+    if data == "nav:main":
         _clear_flow(context)
         await _send_menu(
             update,
             context,
             text=WELCOME_CAPTION,
             keyboard=main_menu_keyboard(),
+            banner="banner",
+        )
+        return
+
+    if data == "menu:bump":
+        _clear_flow(context)
+        await _send_menu(
+            update,
+            context,
+            text=bump_menu_text(),
+            keyboard=bump_packages_keyboard(),
             banner="banner",
         )
         return
@@ -424,6 +470,9 @@ async def _handle_tx_submission(
 
 def register_handlers(application: Application) -> None:
     application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("bump", bump_command))
+    application.add_handler(CommandHandler("volume", volume_command))
+    application.add_handler(CommandHandler("trending", trending_command))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CallbackQueryHandler(on_callback))
     application.add_handler(

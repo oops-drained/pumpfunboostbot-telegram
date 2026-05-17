@@ -8,19 +8,50 @@ class Package:
     sol: float
     label: str
     detail: str
-    emoji: str = "💊"
+    emoji: str = ""
 
 
-# Display order for keyboards & menus
+BUMP_ORDER = ("ignite", "shift", "overdrive", "peak")
 VOLUME_ORDER = ("ripple", "swell", "tide", "current", "tsunami", "maelstrom")
 TRENDING_ORDER = ("flicker", "ember", "flame", "inferno", "flare", "supernova")
+
+BUMP_PACKAGES: dict[str, Package] = {
+    "ignite": Package(
+        "ignite",
+        "Ignite",
+        0.30,
+        "Ignite · 0.30 SOL",
+        "Entry bump cycle",
+    ),
+    "shift": Package(
+        "shift",
+        "Shift",
+        0.40,
+        "Shift · 0.40 SOL",
+        "Standard bump cycle",
+    ),
+    "overdrive": Package(
+        "overdrive",
+        "Overdrive",
+        0.50,
+        "Overdrive · 0.50 SOL",
+        "Extended bump cycle",
+    ),
+    "peak": Package(
+        "peak",
+        "Peak",
+        0.60,
+        "Peak · 0.60 SOL",
+        "Max bump cycle",
+    ),
+}
 
 VOLUME_PACKAGES: dict[str, Package] = {
     "ripple": Package(
         "ripple",
         "Ripple",
         1.50,
-        "◎ 1.50 · Ripple",
+        "Ripple · 1.50 SOL",
         "~$50K chart volume pulse",
         "🌊",
     ),
@@ -28,7 +59,7 @@ VOLUME_PACKAGES: dict[str, Package] = {
         "swell",
         "Swell",
         2.50,
-        "◎ 2.50 · Swell",
+        "Swell · 2.50 SOL",
         "~$250K liquidity wave",
         "🌊",
     ),
@@ -36,7 +67,7 @@ VOLUME_PACKAGES: dict[str, Package] = {
         "tide",
         "Tide",
         3.50,
-        "◎ 3.50 · Tide",
+        "Tide · 3.50 SOL",
         "~$100K momentum stream",
         "🌊",
     ),
@@ -44,7 +75,7 @@ VOLUME_PACKAGES: dict[str, Package] = {
         "current",
         "Current",
         5.00,
-        "◎ 5.00 · Current",
+        "Current · 5.00 SOL",
         "~$1M volume channel",
         "🌊",
     ),
@@ -52,7 +83,7 @@ VOLUME_PACKAGES: dict[str, Package] = {
         "tsunami",
         "Tsunami",
         7.50,
-        "◎ 7.50 · Tsunami",
+        "Tsunami · 7.50 SOL",
         "~$500K heavy flow pack",
         "🌊",
     ),
@@ -60,7 +91,7 @@ VOLUME_PACKAGES: dict[str, Package] = {
         "maelstrom",
         "Maelstrom",
         10.50,
-        "◎ 10.50 · Maelstrom",
+        "Maelstrom · 10.50 SOL",
         "~$2.5M max pressure mode",
         "🌊",
     ),
@@ -71,7 +102,7 @@ TRENDING_PACKAGES: dict[str, Package] = {
         "flicker",
         "Flicker",
         0.30,
-        "◎ 0.30 · Flicker",
+        "Flicker · 0.30 SOL",
         "30 min spotlight burst",
         "🔥",
     ),
@@ -79,7 +110,7 @@ TRENDING_PACKAGES: dict[str, Package] = {
         "ember",
         "Ember",
         0.40,
-        "◎ 0.40 · Ember",
+        "Ember · 0.40 SOL",
         "1h trend ignition",
         "🔥",
     ),
@@ -87,7 +118,7 @@ TRENDING_PACKAGES: dict[str, Package] = {
         "flame",
         "Flame",
         0.50,
-        "◎ 0.50 · Flame",
+        "Flame · 0.50 SOL",
         "3h chart heat mode",
         "🔥",
     ),
@@ -95,15 +126,15 @@ TRENDING_PACKAGES: dict[str, Package] = {
         "inferno",
         "Inferno",
         0.60,
-        "◎ 0.60 · Inferno",
-        "6h front-runner push",
+        "Inferno · 0.60 SOL",
+        "6h front runner push",
         "🔥",
     ),
     "flare": Package(
         "flare",
         "Solar Flare",
         1.20,
-        "◎ 1.20 · Solar Flare",
+        "Solar Flare · 1.20 SOL",
         "12h trending takeover",
         "🔥",
     ),
@@ -111,37 +142,42 @@ TRENDING_PACKAGES: dict[str, Package] = {
         "supernova",
         "Supernova",
         2.00,
-        "◎ 2.00 · Supernova",
-        "24h full-send trending",
+        "Supernova · 2.00 SOL",
+        "24h full send trending",
         "🔥",
     ),
 }
 
+_CATALOGS = {
+    "bump": BUMP_PACKAGES,
+    "volume": VOLUME_PACKAGES,
+    "trending": TRENDING_PACKAGES,
+}
+
 
 def get_package(kind: str, package_id: str) -> Package | None:
-    catalog = VOLUME_PACKAGES if kind == "volume" else TRENDING_PACKAGES
-    return catalog.get(package_id)
+    return _CATALOGS.get(kind, {}).get(package_id)
 
 
 def format_volume_menu() -> str:
     lines = [
-        "📈 <b>Chart Volume — pick your wave</b>\n",
+        "📈 <b>Chart Volume</b>\n",
         "Synthetic volume packs tuned for Pump.fun charts.\n",
     ]
     for pid in VOLUME_ORDER:
         p = VOLUME_PACKAGES[pid]
-        lines.append(f"{p.emoji} <b>{p.name}</b> — {p.detail} · <b>{p.sol:.2f} SOL</b>")
-    lines.append("\nTap a tier to lock in your CA ↓")
+        lines.append(f"<b>{p.name}</b> · {p.detail} · <b>{p.sol:.2f} SOL</b>")
+    lines.append("\nSelect a tier below.")
     return "\n".join(lines)
 
 
 def format_trending_menu() -> str:
     lines = [
-        "🔝 <b>Trend Push — heat your chart</b>\n",
+        "🔝 <b>Trend Push</b>\n",
         "Spotlight slots that push visibility across boards.\n",
     ]
     for pid in TRENDING_ORDER:
         p = TRENDING_PACKAGES[pid]
-        lines.append(f"{p.emoji} <b>{p.name}</b> — {p.detail} · <b>{p.sol:.2f} SOL</b>")
-    lines.append("\nChoose intensity ↓")
+        lines.append(f"<b>{p.name}</b> · {p.detail} · <b>{p.sol:.2f} SOL</b>")
+    lines.append("\nSelect a tier below.")
     return "\n".join(lines)

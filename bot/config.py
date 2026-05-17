@@ -46,6 +46,10 @@ def get_dexscreener_url() -> str:
     return os.getenv("DEXSCREENER_URL", "https://dexscreener.com/solana").strip()
 
 
+def get_trending_channel_url() -> str:
+    return os.getenv("TRENDING_CHANNEL_URL", "https://t.me/pumpmints").strip()
+
+
 def get_encryption_key() -> bytes | None:
     key = os.getenv("ENCRYPTION_KEY", "").strip()
     if not key:

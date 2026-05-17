@@ -11,6 +11,7 @@ from bot.config import (
     get_bot_token,
     get_main_wallet,
 )
+from bot.bot_menu import setup_telegram_menu
 from bot.handlers import register_handlers
 from bot.payment_monitor import payment_monitor_job, refresh_pending_payment_messages
 
@@ -40,6 +41,7 @@ async def post_init(application: Application) -> None:
 
     me = await application.bot.get_me()
     await application.bot.delete_webhook(drop_pending_updates=True)
+    await setup_telegram_menu(application.bot)
     logger.info("Telegram bot @%s (id=%s) — webhook cleared, using polling.", me.username, me.id)
 
     if application.job_queue is None:

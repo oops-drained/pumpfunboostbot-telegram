@@ -2,6 +2,8 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from bot.config import get_dexscreener_url, get_support_url
 from bot.packages import (
+    BUMP_ORDER,
+    BUMP_PACKAGES,
     TRENDING_ORDER,
     TRENDING_PACKAGES,
     VOLUME_ORDER,
@@ -12,7 +14,7 @@ from bot.packages import (
 def main_menu_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         [
-            [InlineKeyboardButton("🚀 Launch Boost", callback_data="menu:start")],
+            [InlineKeyboardButton("🟢 Start Bumping", callback_data="menu:bump")],
             [
                 InlineKeyboardButton("📈 Chart Volume", callback_data="menu:volume"),
                 InlineKeyboardButton("🔝 Trend Push", callback_data="menu:trending"),
@@ -48,6 +50,12 @@ def _package_rows(kind: str, order: tuple[str, ...], catalog: dict) -> list[list
         ]
     )
     return rows
+
+
+def bump_packages_keyboard() -> InlineKeyboardMarkup:
+    rows = _package_rows("bump", BUMP_ORDER, BUMP_PACKAGES)
+    rows[-1] = [InlineKeyboardButton("🔙 Back to Menu", callback_data="nav:main")]
+    return InlineKeyboardMarkup(rows)
 
 
 def volume_packages_keyboard() -> InlineKeyboardMarkup:
