@@ -11,7 +11,7 @@ class Package:
     emoji: str = ""
 
 
-BUMP_ORDER = ("ignite", "shift", "overdrive", "peak")
+BUMP_ORDER = ("starter", "boost", "plus", "pro", "ultra", "max")
 VOLUME_ORDER = ("lite", "standard", "growth", "pro", "elite", "max")
 SOL_TREND_PAIR_ORDER = (
     ("sol_t3_3h", "sol_t10_3h"),
@@ -21,33 +21,47 @@ SOL_TREND_PAIR_ORDER = (
 )
 
 BUMP_PACKAGES: dict[str, Package] = {
-    "ignite": Package(
-        "ignite",
-        "Ignite",
+    "starter": Package(
+        "starter",
+        "Starter",
         0.30,
-        "Ignite · 0.30 SOL",
-        "Entry bump cycle",
+        "Starter · 0.30 SOL",
+        "Light bump",
     ),
-    "shift": Package(
-        "shift",
-        "Shift",
-        0.40,
-        "Shift · 0.40 SOL",
-        "Standard bump cycle",
-    ),
-    "overdrive": Package(
-        "overdrive",
-        "Overdrive",
+    "boost": Package(
+        "boost",
+        "Boost",
         0.50,
-        "Overdrive · 0.50 SOL",
-        "Extended bump cycle",
+        "Boost · 0.50 SOL",
+        "Standard bump",
     ),
-    "peak": Package(
-        "peak",
-        "Peak",
-        0.60,
-        "Peak · 0.60 SOL",
-        "Max bump cycle",
+    "plus": Package(
+        "plus",
+        "Plus",
+        1.00,
+        "Plus · 1.00 SOL",
+        "Enhanced bump",
+    ),
+    "pro": Package(
+        "pro",
+        "Pro",
+        2.00,
+        "Pro · 2.00 SOL",
+        "Pro bump",
+    ),
+    "ultra": Package(
+        "ultra",
+        "Ultra",
+        3.50,
+        "Ultra · 3.50 SOL",
+        "Heavy bump",
+    ),
+    "max": Package(
+        "max",
+        "Max",
+        5.00,
+        "Max · 5.00 SOL",
+        "Maximum bump",
     ),
 }
 

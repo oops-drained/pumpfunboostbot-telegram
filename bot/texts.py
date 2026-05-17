@@ -14,20 +14,26 @@ def welcome_caption() -> str:
         "3. Pay the exact SOL amount to your unique wallet\n"
         "4. We confirm on chain and queue your order\n\n"
         f"<b>Compatible</b>\n{compatible_platforms_html()}\n\n"
-        "✅ Verified on chain payments · ✅ Unique wallet per order · ✅ AI giveaways for active users\n\n"
+        "✅ Verified on chain payments · ✅ Unique wallet per order\n\n"
         "Tap <b>Token Bumping</b> to begin."
     )
 
 
 def bump_menu_text() -> str:
+    from bot.packages import BUMP_ORDER, BUMP_PACKAGES
+
     channel = get_trending_channel_url()
+    tiers = "\n".join(
+        f"· <b>{BUMP_PACKAGES[pid].name}</b> · {BUMP_PACKAGES[pid].sol:.2f} SOL"
+        for pid in BUMP_ORDER
+    )
     return (
         "🟢 <b>Token Bumping</b>\n\n"
         "Fast bump orders for Solana tokens. Simple flow. Transparent pricing.\n\n"
         "<b>Platforms</b>\n"
         f"{compatible_platforms_html()}\n\n"
-        "One time fee from <b>0.30 SOL</b> per token. "
-        "Paid orders unlock eligibility for <b>AI giveaways</b>.\n\n"
+        "<b>Tiers</b> (low to high)\n"
+        f"{tiers}\n\n"
         f"📊 <b>Trending channel</b>\n{channel}\n\n"
         "Select your tier below."
     )
@@ -38,7 +44,7 @@ def help_text() -> str:
     return (
         "ℹ️ <b>How this bot works</b>\n\n"
         "<b>Token Bumping</b>\n"
-        "Quick bump tiers from 0.30 to 0.60 SOL. Best for fast chart activity.\n\n"
+        "Six bump tiers from 0.30 to 5.00 SOL. Best for fast chart activity.\n\n"
         "<b>Chart Volume</b>\n"
         "Six packs from $50K to $5M volume. Price scales with size.\n\n"
         "<b>Trend Push</b>\n"
@@ -150,16 +156,11 @@ def payment_text(order: dict, minutes_left: int) -> str:
 def success_text(order: dict, sweep_tx: str | None) -> str:
     kind = _service_label(order["kind"])
     tx_line = f"\n🔗 <code>{sweep_tx}</code>" if sweep_tx else ""
-    giveaway = (
-        "\n\n🎁 You are eligible for upcoming <b>AI giveaways</b>."
-        if order["kind"] == "bump"
-        else ""
-    )
     return (
         "✅ <b>Payment confirmed</b>\n\n"
         f"<b>{order['package_name']}</b> · {kind}\n"
         f"<code>{order['contract_address']}</code>\n\n"
         "🚀 Queued on boost nodes\n"
-        f"Paid {order['amount_sol']:.2f} SOL{tx_line}{giveaway}\n\n"
+        f"Paid {order['amount_sol']:.2f} SOL{tx_line}\n\n"
         "Updates will appear in this chat. /start for the main menu."
     )

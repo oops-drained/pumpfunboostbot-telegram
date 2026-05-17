@@ -14,7 +14,7 @@ from telegram.ext import (
     filters,
 )
 
-from bot import db
+from bot import admin_log, db
 from bot.config import (
     ASSETS_DIR,
     PAYMENT_TIMEOUT_MINUTES,
@@ -132,6 +132,31 @@ async def _send_menu(
             reply_markup=keyboard,
             disable_web_page_preview=True,
         )
+
+
+async def _prompt_text(query, text: str, reply_markup) -> int:
+    """Edit or replace message (works after photo menus). Returns message_id."""
+    msg = query.message
+    if msg.photo:
+        try:
+            await msg.delete()
+        except Exception:
+            pass
+        sent = await query.get_bot().send_message(
+            chat_id=msg.chat_id,
+            text=text,
+            parse_mode=ParseMode.HTML,
+            reply_markup=reply_markup,
+            disable_web_page_preview=True,
+        )
+        return sent.message_id
+    await query.edit_message_text(
+        text=text,
+        parse_mode=ParseMode.HTML,
+        reply_markup=reply_markup,
+        disable_web_page_preview=True,
+    )
+    return msg.message_id
 
 
 async def _reply_or_edit(query, text: str, *, link_preview: bool = False) -> None:
@@ -316,11 +341,7 @@ async def on_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         context.user_data["flow_kind"] = kind
         context.user_data["flow_package_id"] = package_id
         context.user_data["awaiting_ca"] = True
-        await query.edit_message_text(
-            text=enter_ca_text(pkg, kind),
-            parse_mode=ParseMode.HTML,
-            reply_markup=cancel_keyboard(),
-        )
+        await _prompt_text(query, enter_ca_text(pkg, kind), cancel_keyboard())
         return
 
     if data.startswith("order:confirm:"):
@@ -330,13 +351,12 @@ async def on_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
     if data.startswith("pay:cancel:"):
         order_id = data.split(":", 2)[2]
+        order = await db.get_order(order_id)
         await db.update_order(order_id, status="cancelled")
+        if order:
+            await admin_log.log_order_cancelled(query.get_bot(), order)
         _clear_flow(context)
-        await query.edit_message_text(
-            text="❌ Order cancelled.",
-            parse_mode=ParseMode.HTML,
-            reply_markup=back_main_keyboard(),
-        )
+        await _prompt_text(query, "❌ Order cancelled.", back_main_keyboard())
         return
 
     if data.startswith("pay:sent:"):
@@ -430,10 +450,11 @@ async def _create_payment_order(
     expires = now + timedelta(minutes=PAYMENT_TIMEOUT_MINUTES)
 
     user = update.effective_user
+    chat_id = query.message.chat_id
     row = {
         "id": order_id,
         "user_id": user.id if user else 0,
-        "chat_id": query.message.chat_id,
+        "chat_id": chat_id,
         "message_id": query.message.message_id,
         "kind": kind,
         "package_id": package_id,
@@ -451,14 +472,15 @@ async def _create_payment_order(
         "expires_at": expires.isoformat(),
     }
     await db.create_order(row)
+    await admin_log.log_order_created(context.bot, row, user)
     _clear_flow(context)
 
-    await query.edit_message_text(
-        text=payment_text(row, PAYMENT_TIMEOUT_MINUTES),
-        parse_mode=ParseMode.HTML,
-        reply_markup=payment_keyboard(order_id),
-        disable_web_page_preview=True,
+    message_id = await _prompt_text(
+        query,
+        payment_text(row, PAYMENT_TIMEOUT_MINUTES),
+        payment_keyboard(order_id),
     )
+    await db.set_order_message(order_id, message_id)
 
 
 async def _handle_tx_submission(

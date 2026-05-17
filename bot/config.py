@@ -1,7 +1,10 @@
+import logging
 import os
 from pathlib import Path
 
 from dotenv import load_dotenv
+
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -48,6 +51,23 @@ def get_dexscreener_url() -> str:
 
 def get_trending_channel_url() -> str:
     return os.getenv("TRENDING_CHANNEL_URL", "https://t.me/pumpmints").strip()
+
+
+def get_admin_chat_ids() -> list[int]:
+    """Telegram chat IDs for admin alerts (comma separated)."""
+    raw = os.getenv("ADMIN_CHAT_ID", "").strip()
+    if not raw:
+        return []
+    ids: list[int] = []
+    for part in raw.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        try:
+            ids.append(int(part))
+        except ValueError:
+            logger.warning("Invalid ADMIN_CHAT_ID entry: %s", part)
+    return ids
 
 
 def get_encryption_key() -> bytes | None:

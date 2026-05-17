@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from telegram import Bot
 from telegram.constants import ParseMode
 
-from bot import db
+from bot import admin_log, db
 from bot.config import PAYMENT_POLL_SECONDS, PAYMENT_TIMEOUT_MINUTES
 from bot.keyboards import back_main_keyboard, payment_keyboard
 from bot.solana_wallet import (
@@ -39,6 +39,7 @@ async def process_order_payment(bot: Bot, order: dict) -> bool:
 
     if minutes_left <= 0:
         await db.update_order(order_id, status="expired")
+        await admin_log.log_order_expired(bot, order)
         await _notify(
             bot,
             order,
@@ -64,17 +65,24 @@ async def process_order_payment(bot: Bot, order: dict) -> bool:
         sweep_tx = await sweep_to_main_wallet(order["deposit_secret"])
     except Exception as exc:
         logger.exception("Sweep failed for %s: %s", order_id, exc)
+        detected = lamports_to_sol(balance)
+        await admin_log.log_sweep_failed(
+            bot, order, detected_sol=detected, error=str(exc)[:200]
+        )
         await _notify(
             bot,
             order,
             "⚠️ Payment received but sweep failed. Support will process manually.\n"
-            f"Detected: {lamports_to_sol(balance):.4f} SOL",
+            f"Detected: {detected:.4f} SOL",
             back_main_keyboard(),
         )
         await db.update_order(order_id, status="paid", sweep_tx=sweep_tx or "")
         return True
 
     await db.update_order(order_id, status="paid", sweep_tx=sweep_tx or "")
+    await admin_log.log_payment_paid(
+        bot, order, sweep_tx=sweep_tx, detected_sol=lamports_to_sol(balance)
+    )
     await _notify(
         bot,
         order,

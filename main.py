@@ -61,6 +61,14 @@ async def post_init(application: Application) -> None:
         first=60,
         name="payment_ui_refresh",
     )
+    from bot.config import get_admin_chat_ids
+
+    admins = get_admin_chat_ids()
+    if admins:
+        logger.info("Admin alerts enabled for chat IDs: %s", admins)
+    else:
+        logger.info("ADMIN_CHAT_ID not set — admin alerts disabled.")
+
     logger.info("Database ready; payment monitor started.")
 
 
