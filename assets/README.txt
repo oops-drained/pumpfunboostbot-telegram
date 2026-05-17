@@ -1,7 +1,7 @@
-Optional banner images (send with /start menus):
+Banner images (used automatically by the bot):
 
-  banner.jpg   — main welcome screen
-  volume.jpg   — volume boost packages
-  trending.jpg — trending boost packages
+  banner.png   — main menu (/start)
+  volume.png   — Chart Volume packages
+  trending.png — Trend Push packages
 
-If missing, the bot sends text-only menus.
+These files are included in the Docker image. After updating images, redeploy on Dokploy.

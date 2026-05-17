@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from telegram import Update
+from telegram import InputMediaPhoto, Update
 from telegram.constants import ParseMode
 from telegram.ext import (
     Application,
@@ -78,30 +78,38 @@ async def _send_menu(
 
     if image and chat:
         if query and query.message and query.message.photo:
-            await query.edit_message_caption(
-                caption=text,
-                parse_mode=ParseMode.HTML,
-                reply_markup=keyboard,
-            )
-        elif query and query.message:
+            with image.open("rb") as photo_file:
+                await query.edit_message_media(
+                    media=InputMediaPhoto(
+                        media=photo_file,
+                        caption=text,
+                        parse_mode=ParseMode.HTML,
+                    ),
+                    reply_markup=keyboard,
+                )
+            return
+        if query and query.message:
             try:
                 await query.message.delete()
             except Exception:
                 pass
-            await chat.send_photo(
-                photo=image.open("rb"),
-                caption=text,
-                parse_mode=ParseMode.HTML,
-                reply_markup=keyboard,
-            )
-        elif update.message:
-            await update.message.reply_photo(
-                photo=image.open("rb"),
-                caption=text,
-                parse_mode=ParseMode.HTML,
-                reply_markup=keyboard,
-            )
-        return
+            with image.open("rb") as photo_file:
+                await chat.send_photo(
+                    photo=photo_file,
+                    caption=text,
+                    parse_mode=ParseMode.HTML,
+                    reply_markup=keyboard,
+                )
+            return
+        if update.message:
+            with image.open("rb") as photo_file:
+                await update.message.reply_photo(
+                    photo=photo_file,
+                    caption=text,
+                    parse_mode=ParseMode.HTML,
+                    reply_markup=keyboard,
+                )
+            return
 
     if query and query.message:
         await query.edit_message_text(
