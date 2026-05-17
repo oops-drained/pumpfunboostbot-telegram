@@ -1,5 +1,5 @@
 from bot.config import get_trending_channel_url
-from bot.packages import Package, format_trending_menu, format_volume_menu
+from bot.packages import Package, format_sol_trending_menu, format_volume_menu
 from bot.platforms import compatible_platforms_html
 
 
@@ -40,9 +40,9 @@ def help_text() -> str:
         "<b>Token Bumping</b>\n"
         "Quick bump tiers from 0.30 to 0.60 SOL. Best for fast chart activity.\n\n"
         "<b>Chart Volume</b>\n"
-        "Higher volume packages for deeper chart presence.\n\n"
+        "Six packs from $50K to $5M volume. Price scales with size.\n\n"
         "<b>Trend Push</b>\n"
-        "Trending visibility packages with longer runtimes.\n\n"
+        "<b>SOL Trending</b> (TOP 3 / TOP 10) or <b>Pump.fun Trending</b> (premium pack).\n\n"
         "<b>Payments</b>\n"
         "• Each order gets a unique Solana address\n"
         "• Send the exact SOL amount shown\n"
@@ -58,14 +58,39 @@ def help_text() -> str:
 
 
 VOLUME_MENU_TEXT = format_volume_menu()
-TRENDING_MENU_TEXT = format_trending_menu()
+
+
+def trending_hub_text() -> str:
+    return (
+        "🔝 <b>Trend Push</b>\n\n"
+        "Boost visibility for your token.\n\n"
+        "<b>SOL Trending</b>\n"
+        "DexScreener and SOL trend boards. TOP 3 or TOP 10 by duration.\n\n"
+        "<b>Pump.fun Trending</b>\n"
+        "Premium slot in the Pump.fun bot section.\n"
+        "Includes <b>12 hours free SOL trending</b> with purchase.\n\n"
+        "Choose your trending type below."
+    )
+
+
+def pump_trending_menu_text() -> str:
+    return (
+        "🔥 <b>Pump.fun Trending</b>\n\n"
+        "Top placement in the Pump.fun bot trending section.\n\n"
+        "Bonus: <b>12 hours free SOL trending</b> included with this pack.\n\n"
+        "Select the package below."
+    )
+
+
+SOL_TRENDING_MENU_TEXT = format_sol_trending_menu()
 
 
 def _service_label(kind: str) -> str:
     return {
         "bump": "Token Bumping",
         "volume": "Chart Volume",
-        "trending": "Trend Push",
+        "trend_sol": "SOL Trending",
+        "trend_pump": "Pump.fun Trending",
     }.get(kind, "Boost")
 
 

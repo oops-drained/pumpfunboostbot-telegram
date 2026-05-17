@@ -29,7 +29,9 @@ from bot.keyboards import (
     main_menu_keyboard,
     payment_keyboard,
     bump_packages_keyboard,
-    trending_packages_keyboard,
+    pump_trending_keyboard,
+    sol_trending_keyboard,
+    trending_hub_keyboard,
     volume_packages_keyboard,
 )
 from bot.packages import get_package
@@ -41,8 +43,10 @@ from bot.solana_wallet import (
     payment_satisfied,
 )
 from bot.texts import (
-    TRENDING_MENU_TEXT,
+    SOL_TRENDING_MENU_TEXT,
     VOLUME_MENU_TEXT,
+    pump_trending_menu_text,
+    trending_hub_text,
     bump_menu_text,
     enter_ca_text,
     help_text,
@@ -240,8 +244,30 @@ async def on_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         await _send_menu(
             update,
             context,
-            text=TRENDING_MENU_TEXT,
-            keyboard=trending_packages_keyboard(),
+            text=trending_hub_text(),
+            keyboard=trending_hub_keyboard(),
+            banner="trending",
+        )
+        return
+
+    if data == "menu:trending_sol":
+        _clear_flow(context)
+        await _send_menu(
+            update,
+            context,
+            text=SOL_TRENDING_MENU_TEXT,
+            keyboard=sol_trending_keyboard(),
+            banner="trending",
+        )
+        return
+
+    if data == "menu:trending_pump":
+        _clear_flow(context)
+        await _send_menu(
+            update,
+            context,
+            text=pump_trending_menu_text(),
+            keyboard=pump_trending_keyboard(),
             banner="trending",
         )
         return

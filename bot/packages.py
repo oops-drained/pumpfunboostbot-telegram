@@ -12,8 +12,13 @@ class Package:
 
 
 BUMP_ORDER = ("ignite", "shift", "overdrive", "peak")
-VOLUME_ORDER = ("ripple", "swell", "tide", "current", "tsunami", "maelstrom")
-TRENDING_ORDER = ("flicker", "ember", "flame", "inferno", "flare", "supernova")
+VOLUME_ORDER = ("lite", "standard", "growth", "pro", "elite", "max")
+SOL_TREND_PAIR_ORDER = (
+    ("sol_t3_3h", "sol_t10_3h"),
+    ("sol_t3_6h", "sol_t10_6h"),
+    ("sol_t3_12h", "sol_t10_12h"),
+    ("sol_t3_24h", "sol_t10_24h"),
+)
 
 BUMP_PACKAGES: dict[str, Package] = {
     "ignite": Package(
@@ -47,111 +52,124 @@ BUMP_PACKAGES: dict[str, Package] = {
 }
 
 VOLUME_PACKAGES: dict[str, Package] = {
-    "ripple": Package(
-        "ripple",
-        "Ripple",
+    "lite": Package(
+        "lite",
+        "Lite",
         1.50,
-        "Ripple · 1.50 SOL",
-        "~$50K chart volume pulse",
-        "🌊",
+        "Lite · 1.50 SOL",
+        "$50,000 volume",
     ),
-    "swell": Package(
-        "swell",
-        "Swell",
+    "standard": Package(
+        "standard",
+        "Standard",
         2.50,
-        "Swell · 2.50 SOL",
-        "~$250K liquidity wave",
-        "🌊",
+        "Standard · 2.50 SOL",
+        "$250,000 volume",
     ),
-    "tide": Package(
-        "tide",
-        "Tide",
+    "growth": Package(
+        "growth",
+        "Growth",
         3.50,
-        "Tide · 3.50 SOL",
-        "~$100K momentum stream",
-        "🌊",
+        "Growth · 3.50 SOL",
+        "$500,000 volume",
     ),
-    "current": Package(
-        "current",
-        "Current",
+    "pro": Package(
+        "pro",
+        "Pro",
         5.00,
-        "Current · 5.00 SOL",
-        "~$1M volume channel",
-        "🌊",
+        "Pro · 5.00 SOL",
+        "$1,000,000 volume",
     ),
-    "tsunami": Package(
-        "tsunami",
-        "Tsunami",
+    "elite": Package(
+        "elite",
+        "Elite",
         7.50,
-        "Tsunami · 7.50 SOL",
-        "~$500K heavy flow pack",
-        "🌊",
+        "Elite · 7.50 SOL",
+        "$2,500,000 volume",
     ),
-    "maelstrom": Package(
-        "maelstrom",
-        "Maelstrom",
+    "max": Package(
+        "max",
+        "Max",
         10.50,
-        "Maelstrom · 10.50 SOL",
-        "~$2.5M max pressure mode",
-        "🌊",
+        "Max · 10.50 SOL",
+        "$5,000,000 volume",
     ),
 }
 
-TRENDING_PACKAGES: dict[str, Package] = {
-    "flicker": Package(
-        "flicker",
-        "Flicker",
-        0.30,
-        "Flicker · 0.30 SOL",
-        "30 min spotlight burst",
-        "🔥",
+SOL_TRENDING_PACKAGES: dict[str, Package] = {
+    "sol_t3_3h": Package(
+        "sol_t3_3h",
+        "TOP 3 · 3h",
+        1.50,
+        "TOP 3 · 3h · 1.50 SOL",
+        "3 hours · TOP 3 · SOL trending",
     ),
-    "ember": Package(
-        "ember",
-        "Ember",
-        0.40,
-        "Ember · 0.40 SOL",
-        "1h trend ignition",
-        "🔥",
+    "sol_t3_6h": Package(
+        "sol_t3_6h",
+        "TOP 3 · 6h",
+        2.30,
+        "TOP 3 · 6h · 2.30 SOL",
+        "6 hours · TOP 3 · SOL trending",
     ),
-    "flame": Package(
-        "flame",
-        "Flame",
-        0.50,
-        "Flame · 0.50 SOL",
-        "3h chart heat mode",
-        "🔥",
+    "sol_t3_12h": Package(
+        "sol_t3_12h",
+        "TOP 3 · 12h",
+        3.70,
+        "TOP 3 · 12h · 3.70 SOL",
+        "12 hours · TOP 3 · SOL trending",
     ),
-    "inferno": Package(
-        "inferno",
-        "Inferno",
-        0.60,
-        "Inferno · 0.60 SOL",
-        "6h front runner push",
-        "🔥",
+    "sol_t3_24h": Package(
+        "sol_t3_24h",
+        "TOP 3 · 24h",
+        5.90,
+        "TOP 3 · 24h · 5.90 SOL",
+        "24 hours · TOP 3 · SOL trending",
     ),
-    "flare": Package(
-        "flare",
-        "Solar Flare",
-        1.20,
-        "Solar Flare · 1.20 SOL",
-        "12h trending takeover",
-        "🔥",
+    "sol_t10_3h": Package(
+        "sol_t10_3h",
+        "TOP 10 · 3h",
+        1.00,
+        "TOP 10 · 3h · 1.00 SOL",
+        "3 hours · TOP 10 · SOL trending",
     ),
-    "supernova": Package(
-        "supernova",
-        "Supernova",
-        2.00,
-        "Supernova · 2.00 SOL",
-        "24h full send trending",
-        "🔥",
+    "sol_t10_6h": Package(
+        "sol_t10_6h",
+        "TOP 10 · 6h",
+        1.60,
+        "TOP 10 · 6h · 1.60 SOL",
+        "6 hours · TOP 10 · SOL trending",
+    ),
+    "sol_t10_12h": Package(
+        "sol_t10_12h",
+        "TOP 10 · 12h",
+        2.60,
+        "TOP 10 · 12h · 2.60 SOL",
+        "12 hours · TOP 10 · SOL trending",
+    ),
+    "sol_t10_24h": Package(
+        "sol_t10_24h",
+        "TOP 10 · 24h",
+        4.10,
+        "TOP 10 · 24h · 4.10 SOL",
+        "24 hours · TOP 10 · SOL trending",
+    ),
+}
+
+PUMP_TRENDING_PACKAGES: dict[str, Package] = {
+    "pump_pft": Package(
+        "pump_pft",
+        "Pump.fun Trending",
+        30.00,
+        "P.F.T · 30 SOL",
+        "Pump.fun bot section · includes 12h free SOL trending",
     ),
 }
 
 _CATALOGS = {
     "bump": BUMP_PACKAGES,
     "volume": VOLUME_PACKAGES,
-    "trending": TRENDING_PACKAGES,
+    "trend_sol": SOL_TRENDING_PACKAGES,
+    "trend_pump": PUMP_TRENDING_PACKAGES,
 }
 
 
@@ -164,26 +182,29 @@ def format_volume_menu() -> str:
 
     lines = [
         "📈 <b>Chart Volume</b>\n",
-        "Volume packs for deeper chart presence.\n",
+        "Pick a pack. Higher price = more volume.\n",
         f"\n<b>Platforms</b>\n{compatible_platforms_html()}\n",
     ]
     for pid in VOLUME_ORDER:
         p = VOLUME_PACKAGES[pid]
         lines.append(f"<b>{p.name}</b> · {p.detail} · <b>{p.sol:.2f} SOL</b>")
-    lines.append("\nSelect a tier below.")
+    lines.append("\nSelect a pack below.")
     return "\n".join(lines)
 
 
-def format_trending_menu() -> str:
-    from bot.platforms import compatible_platforms_html
-
+def format_sol_trending_menu() -> str:
     lines = [
-        "🔝 <b>Trend Push</b>\n",
-        "Trending visibility for Solana tokens.\n",
-        f"\n<b>Platforms</b>\n{compatible_platforms_html()}\n",
+        "🟢 <b>SOL Trending</b>\n",
+        "More visibility on SOL boards with milestone and uptrend alerts.\n",
+        "Paid boosts can qualify for our daily livestream (AMA).\n",
+        "\n<b>TOP 3</b> (premium slot)",
     ]
-    for pid in TRENDING_ORDER:
-        p = TRENDING_PACKAGES[pid]
-        lines.append(f"<b>{p.name}</b> · {p.detail} · <b>{p.sol:.2f} SOL</b>")
-    lines.append("\nSelect a tier below.")
+    for pid in ("sol_t3_3h", "sol_t3_6h", "sol_t3_12h", "sol_t3_24h"):
+        p = SOL_TRENDING_PACKAGES[pid]
+        lines.append(f"· {p.detail}")
+    lines.append("\n<b>TOP 10</b>")
+    for pid in ("sol_t10_3h", "sol_t10_6h", "sol_t10_12h", "sol_t10_24h"):
+        p = SOL_TRENDING_PACKAGES[pid]
+        lines.append(f"· {p.detail}")
+    lines.append("\nPick TOP 3 (left) or TOP 10 (right) below.")
     return "\n".join(lines)

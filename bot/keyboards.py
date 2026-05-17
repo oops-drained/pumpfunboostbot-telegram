@@ -4,8 +4,9 @@ from bot.config import get_dexscreener_url, get_support_url
 from bot.packages import (
     BUMP_ORDER,
     BUMP_PACKAGES,
-    TRENDING_ORDER,
-    TRENDING_PACKAGES,
+    SOL_TREND_PAIR_ORDER,
+    SOL_TRENDING_PACKAGES,
+    PUMP_TRENDING_PACKAGES,
     VOLUME_ORDER,
     VOLUME_PACKAGES,
 )
@@ -46,27 +47,74 @@ def _package_rows(kind: str, order: tuple[str, ...], catalog: dict) -> list[list
                 )
             )
         rows.append(row)
+    return rows
+
+
+def bump_packages_keyboard() -> InlineKeyboardMarkup:
+    rows = _package_rows("bump", BUMP_ORDER, BUMP_PACKAGES)
+    rows.append([InlineKeyboardButton("🔙 Back to Menu", callback_data="nav:main")])
+    return InlineKeyboardMarkup(rows)
+
+
+def volume_packages_keyboard() -> InlineKeyboardMarkup:
+    rows = _package_rows("volume", VOLUME_ORDER, VOLUME_PACKAGES)
     rows.append(
         [
             InlineKeyboardButton("⬅️ Back", callback_data="nav:main"),
             InlineKeyboardButton("🏠 Main Menu", callback_data="nav:main"),
         ]
     )
-    return rows
-
-
-def bump_packages_keyboard() -> InlineKeyboardMarkup:
-    rows = _package_rows("bump", BUMP_ORDER, BUMP_PACKAGES)
-    rows[-1] = [InlineKeyboardButton("🔙 Back to Menu", callback_data="nav:main")]
     return InlineKeyboardMarkup(rows)
 
 
-def volume_packages_keyboard() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(_package_rows("volume", VOLUME_ORDER, VOLUME_PACKAGES))
+def trending_hub_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        [
+            [InlineKeyboardButton("🟢 SOL Trending", callback_data="menu:trending_sol")],
+            [InlineKeyboardButton("🔥 Pump.fun Trending", callback_data="menu:trending_pump")],
+            [
+                InlineKeyboardButton("⬅️ Back", callback_data="nav:main"),
+                InlineKeyboardButton("🏠 Main Menu", callback_data="nav:main"),
+            ],
+        ]
+    )
 
 
-def trending_packages_keyboard() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(_package_rows("trending", TRENDING_ORDER, TRENDING_PACKAGES))
+def sol_trending_keyboard() -> InlineKeyboardMarkup:
+    rows = []
+    for left_id, right_id in SOL_TREND_PAIR_ORDER:
+        rows.append(
+            [
+                InlineKeyboardButton(
+                    SOL_TRENDING_PACKAGES[left_id].label,
+                    callback_data=f"pkg:trend_sol:{left_id}",
+                ),
+                InlineKeyboardButton(
+                    SOL_TRENDING_PACKAGES[right_id].label,
+                    callback_data=f"pkg:trend_sol:{right_id}",
+                ),
+            ]
+        )
+    rows.append(
+        [
+            InlineKeyboardButton("⬅️ Back", callback_data="menu:trending"),
+            InlineKeyboardButton("🏠 Main Menu", callback_data="nav:main"),
+        ]
+    )
+    return InlineKeyboardMarkup(rows)
+
+
+def pump_trending_keyboard() -> InlineKeyboardMarkup:
+    pkg = PUMP_TRENDING_PACKAGES["pump_pft"]
+    return InlineKeyboardMarkup(
+        [
+            [InlineKeyboardButton(pkg.label, callback_data="pkg:trend_pump:pump_pft")],
+            [
+                InlineKeyboardButton("⬅️ Back", callback_data="menu:trending"),
+                InlineKeyboardButton("🏠 Main Menu", callback_data="nav:main"),
+            ],
+        ]
+    )
 
 
 def cancel_keyboard() -> InlineKeyboardMarkup:
