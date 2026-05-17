@@ -45,6 +45,16 @@ python main.py
 
 Optional: add `assets/banner.jpg`, `assets/volume.jpg`, `assets/trending.jpg` for photo menus.
 
+## Bot antwortet nicht? (Troubleshooting)
+
+1. **Dokploy → Logs** öffnen. Suche nach:
+   - `Telegram bot @deinbot` → läuft OK
+   - `STARTUP FAILED` / `Job queue not available` → Env fehlt oder alter Build
+   - `MAIN_WALLET is not set` → Variable in Dokploy setzen
+2. **Env in Dokploy** (nicht nur lokal in `.env`): `BOT_TOKEN`, `MAIN_WALLET`
+3. **Gleicher Bot?** Token muss zu dem Bot passen, den du in Telegram öffnest.
+4. Nach Code-Fix: **Redeploy** (neuer Docker-Build wegen `requirements.txt`).
+
 ## Deploy on Dokploy
 
 1. Push repo to GitHub (never commit `.env`).
