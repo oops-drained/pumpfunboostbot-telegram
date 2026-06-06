@@ -10,6 +10,17 @@ from bot.config import DATA_DIR
 DB_PATH = DATA_DIR / "bot.db"
 
 
+def get_db_info() -> dict[str, Any]:
+    exists = DB_PATH.is_file()
+    size = DB_PATH.stat().st_size if exists else 0
+    return {
+        "data_dir": str(DATA_DIR),
+        "db_path": str(DB_PATH),
+        "exists": exists,
+        "size_bytes": size,
+    }
+
+
 def _utcnow() -> str:
     return datetime.now(timezone.utc).isoformat()
 

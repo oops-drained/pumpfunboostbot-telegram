@@ -9,6 +9,15 @@
   <div class="muted mono">Treasury: {{ main_wallet|short_id(6,6) }}</div>
 </div>
 
+{% if stats.total == 0 %}
+<div class="alert alert-warn">
+  <strong>No orders found.</strong> Database: <code>{{ db_info.db_path }}</code>
+  ({{ db_info.size_bytes }} bytes).
+  Admin and bot must share the same <code>/app/data</code> volume in Dokploy —
+  otherwise the panel reads an empty database.
+</div>
+{% endif %}
+
 <div class="grid grid-4" style="margin-bottom:1.25rem;">
   <div class="card">
     <div class="stat-value">{{ "%.2f"|format(stats.revenue_sol) }}</div>

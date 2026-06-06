@@ -79,6 +79,7 @@ async def dashboard(request: Request):
     if redirect := auth.require_auth(request):
         return redirect
     stats = await db.get_order_stats()
+    db_info = db.get_db_info()
     attention = await db.get_attention_orders()
     recent = await db.list_orders(limit=10)
     main_balance = None
@@ -93,6 +94,7 @@ async def dashboard(request: Request):
             request,
             active="dashboard",
             stats=stats,
+            db_info=db_info,
             attention=attention,
             recent=recent,
             main_balance=main_balance,
