@@ -7,6 +7,8 @@ from bot.config import (
     get_admin_panel_host,
     get_admin_panel_password,
     get_admin_panel_port,
+    get_admin_panel_secret,
+    get_main_wallet,
 )
 
 logging.basicConfig(
@@ -16,21 +18,32 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def main() -> None:
+def _validate_admin_config() -> None:
     if not get_admin_panel_password():
-        logger.error(
-            "ADMIN_PANEL_PASSWORD is not set. Add it to .env and restart."
+        raise RuntimeError(
+            "ADMIN_PANEL_PASSWORD is not set. Add it in Dokploy Environment."
         )
+    get_admin_panel_secret()
+    get_main_wallet()
+
+
+def main() -> None:
+    try:
+        _validate_admin_config()
+    except RuntimeError as exc:
+        logger.error("ADMIN PANEL STARTUP FAILED: %s", exc)
         sys.exit(1)
 
     host = get_admin_panel_host()
     port = get_admin_panel_port()
-    logger.info("Admin panel http://%s:%s", host, port)
+    logger.info("Pump Boost Admin Panel starting on http://%s:%s", host, port)
     uvicorn.run(
         "admin.app:app",
         host=host,
         port=port,
         log_level="info",
+        proxy_headers=True,
+        forwarded_allow_ips="*",
     )
 
 

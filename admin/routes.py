@@ -31,7 +31,12 @@ PAGE_SIZE = 30
 
 @router.get("/health")
 async def health():
-    return {"ok": True}
+    return {"ok": True, "service": "admin-panel"}
+
+
+@router.get("/ping")
+async def ping():
+    return "pong"
 ALLOWED_STATUSES = {"pending", "processing", "paid", "fulfilled", "expired", "cancelled"}
 
 

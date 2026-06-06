@@ -9,11 +9,13 @@ COPY bot/ bot/
 COPY admin/ admin/
 COPY main.py .
 COPY admin_main.py .
+COPY start.py .
 COPY assets/ assets/
 
 RUN mkdir -p /app/data
 
 ENV DATA_DIR=/app/data
 ENV ASSETS_DIR=/app/assets
+ENV APP_MODE=bot
 
-CMD ["python", "-u", "main.py"]
+CMD ["python", "-u", "start.py"]
