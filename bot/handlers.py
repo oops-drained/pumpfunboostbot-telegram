@@ -22,6 +22,7 @@ from bot.config import (
     get_main_wallet,
 )
 from bot.db import dump_token_meta
+from bot.payment_monitor import process_order_payment
 from bot.keyboards import (
     back_main_keyboard,
     cancel_keyboard,
@@ -506,6 +507,7 @@ async def _handle_tx_submission(
                 f"✅ Payment detected ({lamports_to_sol(balance):.4f} SOL). "
                 "Confirming and sweeping — you'll get a message shortly."
             )
+            await process_order_payment(context.bot, order)
         else:
             await update.message.reply_text(
                 f"⏳ No matching payment yet on <code>{order['deposit_wallet']}</code>.\n"

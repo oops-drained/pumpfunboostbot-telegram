@@ -31,43 +31,20 @@ def _minutes_left(expires_at: str) -> int:
     return max(0, int(delta.total_seconds() // 60))
 
 
-async def process_order_payment(bot: Bot, order: dict) -> bool:
-    """Returns True if order was finalized (paid or expired)."""
+async def _finalize_paid(
+    bot: Bot,
+    order: dict,
+    balance: int,
+    sweep_tx: str | None,
+    *,
+    sweep_failed: bool,
+    error: str = "sweep failed",
+) -> None:
     order_id = order["id"]
-    expires_at = order["expires_at"]
-    minutes_left = _minutes_left(expires_at)
-
-    if minutes_left <= 0:
-        await db.update_order(order_id, status="expired")
-        await admin_log.log_order_expired(bot, order)
-        await _notify(
-            bot,
-            order,
-            "⏰ <b>Order Expired</b>\n\nPayment window closed. Start a new order from the main menu.",
-            back_main_keyboard(),
-        )
-        return True
-
-    try:
-        balance = await get_balance_lamports(order["deposit_wallet"])
-    except Exception as exc:
-        logger.warning("Balance check failed for %s: %s", order_id, exc)
-        return False
-
-    if not payment_satisfied(balance, order["amount_sol"]):
-        return False
-
-    if not await db.claim_order_for_processing(order_id):
-        return True
-
-    sweep_tx = None
-    try:
-        sweep_tx = await sweep_to_main_wallet(order["deposit_secret"])
-    except Exception as exc:
-        logger.exception("Sweep failed for %s: %s", order_id, exc)
-        detected = lamports_to_sol(balance)
+    detected = lamports_to_sol(balance)
+    if sweep_failed:
         await admin_log.log_sweep_failed(
-            bot, order, detected_sol=detected, error=str(exc)[:200]
+            bot, order, detected_sol=detected, error=error[:200]
         )
         await _notify(
             bot,
@@ -76,19 +53,78 @@ async def process_order_payment(bot: Bot, order: dict) -> bool:
             f"Detected: {detected:.4f} SOL",
             back_main_keyboard(),
         )
-        await db.update_order(order_id, status="paid", sweep_tx=sweep_tx or "")
+    else:
+        await admin_log.log_payment_paid(
+            bot, order, sweep_tx=sweep_tx, detected_sol=detected
+        )
+        await _notify(
+            bot,
+            order,
+            success_text({**order, "status": "paid"}, sweep_tx),
+            back_main_keyboard(),
+        )
+    await db.update_order(order_id, status="paid", sweep_tx=sweep_tx or "")
+
+
+async def process_order_payment(bot: Bot, order: dict) -> bool:
+    """Returns True if order was finalized (paid or expired)."""
+    order_id = order["id"]
+    status = order["status"]
+    retry = status == "processing"
+
+    if not retry:
+        minutes_left = _minutes_left(order["expires_at"])
+        if minutes_left <= 0:
+            await db.update_order(order_id, status="expired")
+            await admin_log.log_order_expired(bot, order)
+            await _notify(
+                bot,
+                order,
+                "⏰ <b>Order Expired</b>\n\nPayment window closed. Start a new order from the main menu.",
+                back_main_keyboard(),
+            )
+            return True
+
+    try:
+        balance = await get_balance_lamports(order["deposit_wallet"])
+    except Exception as exc:
+        logger.warning("Balance check failed for %s: %s", order_id, exc)
+        return False
+
+    if not payment_satisfied(balance, order["amount_sol"]):
+        if retry and order.get("sweep_tx"):
+            await db.update_order(order_id, status="paid")
+            return True
+        return False
+
+    logger.info(
+        "Payment detected for %s: %.4f SOL on %s",
+        order_id,
+        lamports_to_sol(balance),
+        order["deposit_wallet"],
+    )
+
+    if not retry:
+        if not await db.claim_order_for_processing(order_id):
+            return True
+
+    sweep_tx = None
+    try:
+        sweep_tx = await sweep_to_main_wallet(order["deposit_secret"])
+    except Exception as exc:
+        logger.exception("Sweep failed for %s: %s", order_id, exc)
+        await _finalize_paid(
+            bot, order, balance, sweep_tx, sweep_failed=True, error=str(exc)
+        )
         return True
 
-    await db.update_order(order_id, status="paid", sweep_tx=sweep_tx or "")
-    await admin_log.log_payment_paid(
-        bot, order, sweep_tx=sweep_tx, detected_sol=lamports_to_sol(balance)
-    )
-    await _notify(
-        bot,
-        order,
-        success_text({**order, "status": "paid"}, sweep_tx),
-        back_main_keyboard(),
-    )
+    if not sweep_tx:
+        await _finalize_paid(
+            bot, order, balance, sweep_tx, sweep_failed=True, error="balance too low to sweep"
+        )
+        return True
+
+    await _finalize_paid(bot, order, balance, sweep_tx, sweep_failed=False)
     return True
 
 
@@ -125,7 +161,7 @@ async def _notify(bot: Bot, order: dict, text: str, reply_markup) -> None:
 
 async def payment_monitor_job(context) -> None:
     bot: Bot = context.bot
-    pending = await db.get_pending_orders()
+    pending = await db.get_orders_for_payment_monitor()
     for order in pending:
         try:
             await process_order_payment(bot, order)

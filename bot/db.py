@@ -112,6 +112,21 @@ async def get_pending_orders() -> list[dict[str, Any]]:
             return [dict(r) for r in rows]
 
 
+async def get_orders_for_payment_monitor() -> list[dict[str, Any]]:
+    """Pending orders + stuck processing (crash after claim, before paid)."""
+    async with aiosqlite.connect(DB_PATH) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute(
+            """
+            SELECT * FROM orders
+            WHERE status IN ('pending', 'processing')
+            ORDER BY created_at ASC
+            """
+        ) as cursor:
+            rows = await cursor.fetchall()
+            return [dict(r) for r in rows]
+
+
 async def claim_order_for_processing(order_id: str) -> bool:
     """Atomically move pending → processing so only one worker sweeps."""
     async with aiosqlite.connect(DB_PATH) as db:
