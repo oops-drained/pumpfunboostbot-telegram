@@ -32,13 +32,17 @@ def resolve_mode() -> str:
 
 
 def _log_env_check(mode: str) -> None:
+    env_files = []
+    for path in ("/app/.env", ".env"):
+        env_files.append(f"{path}:{'yes' if os.path.isfile(path) else 'no'}")
     logger.info(
-        "Env check: mode=%s APP_MODE=%s ADMIN_PANEL_PASSWORD=%s BOT_TOKEN=%s MAIN_WALLET=%s",
+        "Env check: mode=%s APP_MODE=%s ADMIN_PANEL_PASSWORD=%s BOT_TOKEN=%s MAIN_WALLET=%s env_files=[%s]",
         mode,
         os.getenv("APP_MODE", "<unset>"),
         "set" if _env_set("ADMIN_PANEL_PASSWORD") else "MISSING",
         "set" if _env_set("BOT_TOKEN") else "MISSING",
         "set" if _env_set("MAIN_WALLET") else "MISSING",
+        ", ".join(env_files),
     )
 
 

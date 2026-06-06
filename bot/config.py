@@ -6,9 +6,21 @@ from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
 
-load_dotenv()
-
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+def load_env() -> None:
+    """Load env from process, local .env, and Dokploy's /app/.env."""
+    for path in (
+        BASE_DIR / ".env",
+        Path("/app/.env"),
+    ):
+        if path.is_file():
+            load_dotenv(path, override=False)
+    load_dotenv(override=False)
+
+
+load_env()
 DATA_DIR = Path(os.getenv("DATA_DIR", str(BASE_DIR / "data")))
 ASSETS_DIR = Path(os.getenv("ASSETS_DIR", str(BASE_DIR / "assets")))
 
