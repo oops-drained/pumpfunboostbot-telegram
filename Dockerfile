@@ -12,6 +12,9 @@ COPY admin_main.py .
 COPY start.py .
 COPY assets/ assets/
 
+# Dokploy writes .env from the Environment tab before docker build (createEnvFile).
+COPY .env /app/.env
+
 RUN mkdir -p /app/data
 
 ENV DATA_DIR=/app/data

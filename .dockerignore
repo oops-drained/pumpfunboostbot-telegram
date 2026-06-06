@@ -1,6 +1,6 @@
-.env
-.env.*
-!.env.example
+# Do NOT ignore .env — Dokploy generates it at deploy time from the Environment tab.
+.env.local
+.env.*.local
 .venv/
 venv/
 __pycache__/
