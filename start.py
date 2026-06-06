@@ -1,6 +1,7 @@
-"""Unified entrypoint for Dokploy: set APP_MODE=admin or APP_MODE=bot."""
+"""Unified entrypoint for Dokploy: APP_MODE=bot | admin | both."""
 import logging
 import os
+import subprocess
 import sys
 
 logging.basicConfig(
@@ -15,19 +16,9 @@ def _env_set(name: str) -> bool:
 
 
 def resolve_mode() -> str:
-    explicit = os.getenv("APP_MODE", "").strip().lower()
-    has_admin_password = _env_set("ADMIN_PANEL_PASSWORD")
-
-    if explicit == "admin":
-        return "admin"
-    if has_admin_password:
-        if explicit == "bot":
-            logger.warning(
-                "APP_MODE=bot ignored because ADMIN_PANEL_PASSWORD is set — starting admin panel."
-            )
-        return "admin"
-    if explicit == "bot":
-        return "bot"
+    explicit = os.getenv("APP_MODE", "bot").strip().lower()
+    if explicit in ("admin", "bot", "both"):
+        return explicit
     return "bot"
 
 
@@ -46,6 +37,27 @@ def _log_env_check(mode: str) -> None:
     )
 
 
+def _run_both() -> None:
+    if not _env_set("ADMIN_PANEL_PASSWORD"):
+        raise RuntimeError("APP_MODE=both requires ADMIN_PANEL_PASSWORD.")
+    logger.info("Starting admin panel in background on port %s", os.getenv("ADMIN_PANEL_PORT", "8080"))
+    admin_proc = subprocess.Popen(
+        [sys.executable, "-u", "admin_main.py"],
+        env=os.environ.copy(),
+    )
+    logger.info("Starting telegram bot (foreground)...")
+    from main import main as bot_main
+
+    try:
+        bot_main()
+    finally:
+        admin_proc.terminate()
+        try:
+            admin_proc.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            admin_proc.kill()
+
+
 def run() -> None:
     import bot.config  # noqa: F401 — load /app/.env before env check
 
@@ -56,6 +68,8 @@ def run() -> None:
         from admin_main import main as admin_main
 
         admin_main()
+    elif mode == "both":
+        _run_both()
     else:
         from main import main as bot_main
 
