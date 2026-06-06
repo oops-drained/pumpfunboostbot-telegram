@@ -94,7 +94,8 @@ def get_admin_panel_secret() -> str:
 
 
 def get_admin_panel_host() -> str:
-    return os.getenv("ADMIN_PANEL_HOST", "127.0.0.1").strip()
+    # 0.0.0.0 required for Dokploy/Traefik; use 127.0.0.1 only for local-only dev.
+    return os.getenv("ADMIN_PANEL_HOST", "0.0.0.0").strip()
 
 
 def get_admin_panel_port() -> int:

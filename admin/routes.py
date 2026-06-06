@@ -27,6 +27,11 @@ templates.env.filters["short_id"] = short_id
 
 router = APIRouter()
 PAGE_SIZE = 30
+
+
+@router.get("/health")
+async def health():
+    return {"ok": True}
 ALLOWED_STATUSES = {"pending", "processing", "paid", "fulfilled", "expired", "cancelled"}
 
 
