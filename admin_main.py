@@ -21,10 +21,20 @@ logger = logging.getLogger(__name__)
 def _validate_admin_config() -> None:
     if not get_admin_panel_password():
         raise RuntimeError(
-            "ADMIN_PANEL_PASSWORD is not set. Add it in Dokploy Environment."
+            "ADMIN_PANEL_PASSWORD is not set. Add it in Dokploy → Admin App → Environment."
         )
-    get_admin_panel_secret()
-    get_main_wallet()
+    try:
+        get_admin_panel_secret()
+    except RuntimeError:
+        raise RuntimeError(
+            "Set BOT_TOKEN or ADMIN_PANEL_SECRET in Dokploy Environment."
+        ) from None
+    try:
+        get_main_wallet()
+    except RuntimeError:
+        raise RuntimeError(
+            "MAIN_WALLET is not set. Add it in Dokploy Environment."
+        ) from None
 
 
 def main() -> None:

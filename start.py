@@ -10,9 +10,42 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+def _env_set(name: str) -> bool:
+    return bool(os.getenv(name, "").strip())
+
+
+def resolve_mode() -> str:
+    explicit = os.getenv("APP_MODE", "").strip().lower()
+    has_admin_password = _env_set("ADMIN_PANEL_PASSWORD")
+
+    if explicit == "admin":
+        return "admin"
+    if has_admin_password:
+        if explicit == "bot":
+            logger.warning(
+                "APP_MODE=bot ignored because ADMIN_PANEL_PASSWORD is set — starting admin panel."
+            )
+        return "admin"
+    if explicit == "bot":
+        return "bot"
+    return "bot"
+
+
+def _log_env_check(mode: str) -> None:
+    logger.info(
+        "Env check: mode=%s APP_MODE=%s ADMIN_PANEL_PASSWORD=%s BOT_TOKEN=%s MAIN_WALLET=%s",
+        mode,
+        os.getenv("APP_MODE", "<unset>"),
+        "set" if _env_set("ADMIN_PANEL_PASSWORD") else "MISSING",
+        "set" if _env_set("BOT_TOKEN") else "MISSING",
+        "set" if _env_set("MAIN_WALLET") else "MISSING",
+    )
+
+
 def run() -> None:
-    mode = os.getenv("APP_MODE", "bot").strip().lower()
-    logger.info("Starting service with APP_MODE=%s", mode)
+    mode = resolve_mode()
+    _log_env_check(mode)
+    logger.info("Starting service with resolved mode=%s", mode)
     if mode == "admin":
         from admin_main import main as admin_main
 
