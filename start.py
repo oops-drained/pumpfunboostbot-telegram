@@ -47,6 +47,8 @@ def _log_env_check(mode: str) -> None:
 
 
 def run() -> None:
+    import bot.config  # noqa: F401 — load /app/.env before env check
+
     mode = resolve_mode()
     _log_env_check(mode)
     logger.info("Starting service with resolved mode=%s", mode)
