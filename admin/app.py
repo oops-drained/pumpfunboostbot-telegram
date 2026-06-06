@@ -22,6 +22,19 @@ def create_app() -> FastAPI:
     async def startup() -> None:
         ensure_dirs()
         await db.init_db()
+        db_info = db.get_db_info()
+        order_count = await db.count_orders()
+        logger.info(
+            "Database %s (size=%s bytes, orders=%s)",
+            db_info["db_path"],
+            db_info["size_bytes"],
+            order_count,
+        )
+        if order_count == 0 and db_info["size_bytes"] < 5000:
+            logger.warning(
+                "No orders in database. Share bot volume via bind mount if admin "
+                "and bot use separate Dokploy apps."
+            )
         if not get_admin_panel_password():
             logger.warning(
                 "ADMIN_PANEL_PASSWORD is not set — admin login is disabled."
