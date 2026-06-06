@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Wallets{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1>Wallets</h1>
+    <p class="muted">Deposit wallets &amp; treasury</p>
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-bottom:1.25rem;">
+  <div class="card">
+    <h2>Main treasury</h2>
+    <p class="mono">{{ main_wallet }}</p>
+    <p class="stat-value" style="margin-top:0.5rem;">
+      {% if main_balance is not none %}{{ "%.4f"|format(main_balance) }} SOL{% else %}—{% endif %}
+    </p>
+    <p class="muted">All successful sweeps land here.</p>
+  </div>
+  <div class="card">
+    <h2>Deposit wallets</h2>
+    <p class="stat-value">{{ wallets|length }}</p>
+    <p class="muted">One-time wallets (latest order per address).</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Deposit wallet</th><th>Balance</th><th>Order</th><th>Status</th><th>Amount</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for w in wallets %}
+        <tr>
+          <td class="mono">{{ w.deposit_wallet|short_id(8,8) }}</td>
+          <td>
+            {% if w.balance_sol is not none %}
+              {% if w.balance_sol > 0.001 %}
+                <strong>{{ "%.4f"|format(w.balance_sol) }} SOL</strong>
+              {% else %}
+                {{ "%.4f"|format(w.balance_sol) }} SOL
+              {% endif %}
+            {% else %}—{% endif %}
+          </td>
+          <td><a href="/orders/{{ w.id }}"><code>{{ w.id|short_id }}</code></a></td>
+          <td><span class="badge badge-{{ w.status }}">{{ w.status|status_label }}</span></td>
+          <td>{{ "%.2f"|format(w.amount_sol) }} SOL</td>
+          <td><a class="btn" href="/orders/{{ w.id }}">Manage</a></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="muted">No deposit wallets yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

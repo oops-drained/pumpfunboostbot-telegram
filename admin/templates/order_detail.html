@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Order {{ order.id|short_id }}{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1>Order <code>{{ order.id }}</code></h1>
+    <p class="muted">{{ order.created_at|format_dt }}</p>
+  </div>
+  <a class="btn" href="/orders">← Back</a>
+</div>
+
+{% if msg == 'swept' %}
+<div class="alert alert-ok">Sweep successful. Transaction saved.</div>
+{% elif msg == 'status' %}
+<div class="alert alert-ok">Status updated.</div>
+{% elif msg == 'note' %}
+<div class="alert alert-ok">Admin note saved.</div>
+{% endif %}
+{% if err %}
+<div class="alert alert-bad">{{ err }}</div>
+{% endif %}
+
+<div class="grid grid-2">
+  <div class="card">
+    <h2>Order info</h2>
+    <dl class="detail-grid">
+      <dt>Status</dt><dd><span class="badge badge-{{ order.status }}">{{ order.status|status_label }}</span></dd>
+      <dt>User ID</dt><dd>{{ order.user_id }}</dd>
+      <dt>Service</dt><dd>{{ order.kind|service_label }}</dd>
+      <dt>Package</dt><dd>{{ order.package_name }} · {{ order.package_detail }}</dd>
+      <dt>Amount</dt><dd>{{ "%.2f"|format(order.amount_sol) }} SOL</dd>
+      <dt>Expires</dt><dd>{{ order.expires_at|format_dt }}</dd>
+      <dt>Payment TX</dt><dd>{% if order.payment_tx %}<code>{{ order.payment_tx }}</code>{% else %}—{% endif %}</dd>
+      <dt>Sweep TX</dt><dd>{% if order.sweep_tx %}<code>{{ order.sweep_tx }}</code>{% else %}<span class="muted">Not swept</span>{% endif %}</dd>
+    </dl>
+  </div>
+
+  <div class="card">
+    <h2>Token</h2>
+    <dl class="detail-grid">
+      <dt>Name</dt><dd>{{ order.token_name or '—' }}</dd>
+      <dt>Symbol</dt><dd>{{ order.token_symbol or '—' }}</dd>
+      <dt>Contract</dt><dd class="mono">{{ order.contract_address }}</dd>
+      {% if token_meta.price %}
+      <dt>Price</dt><dd>${{ token_meta.price }}</dd>
+      {% endif %}
+      {% if token_meta.market_cap %}
+      <dt>Market cap</dt><dd>${{ token_meta.market_cap }}</dd>
+      {% endif %}
+      {% if token_meta.dexscreener_url %}
+      <dt>DexScreener</dt><dd><a href="{{ token_meta.dexscreener_url }}" target="_blank">Open</a></dd>
+      {% endif %}
+    </dl>
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-top:1rem;">
+  <div class="card">
+    <h2>Deposit wallet</h2>
+    <dl class="detail-grid">
+      <dt>Address</dt><dd class="mono">{{ order.deposit_wallet }}</dd>
+      <dt>On-chain balance</dt>
+      <dd>{% if balance_sol is not none %}{{ "%.4f"|format(balance_sol) }} SOL{% else %}—{% endif %}</dd>
+    </dl>
+    {% if needs_sweep or (balance_sol and balance_sol > 0.001) %}
+    <form method="post" action="/orders/{{ order.id }}/sweep" class="actions">
+      <button class="btn btn-primary" type="submit" onclick="return confirm('Sweep funds to main wallet?')">
+        Retry sweep → treasury
+      </button>
+    </form>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h2>Manual actions</h2>
+    <form method="post" action="/orders/{{ order.id }}/status" class="actions">
+      <select name="status">
+        {% for s in statuses %}
+        <option value="{{ s }}" {% if order.status == s %}selected{% endif %}>{{ s|status_label }}</option>
+        {% endfor %}
+      </select>
+      <button class="btn" type="submit">Update status</button>
+    </form>
+    <form method="post" action="/orders/{{ order.id }}/note" style="margin-top:1rem;">
+      <label class="muted" for="admin_note">Admin note</label>
+      <textarea id="admin_note" name="admin_note">{{ order.admin_note or '' }}</textarea>
+      <div class="actions"><button class="btn" type="submit">Save note</button></div>
+    </form>
+  </div>
+</div>
+{% endblock %}

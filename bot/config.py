@@ -77,6 +77,30 @@ def get_encryption_key() -> bytes | None:
     return key.encode()
 
 
+def get_admin_panel_password() -> str | None:
+    return os.getenv("ADMIN_PANEL_PASSWORD", "").strip() or None
+
+
+def get_admin_panel_secret() -> str:
+    secret = os.getenv("ADMIN_PANEL_SECRET", "").strip()
+    if secret:
+        return secret
+    token = os.getenv("BOT_TOKEN", "").strip()
+    if token:
+        return token
+    raise RuntimeError(
+        "Set ADMIN_PANEL_SECRET or BOT_TOKEN for admin session signing."
+    )
+
+
+def get_admin_panel_host() -> str:
+    return os.getenv("ADMIN_PANEL_HOST", "127.0.0.1").strip()
+
+
+def get_admin_panel_port() -> int:
+    return int(os.getenv("ADMIN_PANEL_PORT", "8080"))
+
+
 def ensure_dirs() -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     ASSETS_DIR.mkdir(parents=True, exist_ok=True)

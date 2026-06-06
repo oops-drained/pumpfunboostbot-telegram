@@ -117,8 +117,10 @@ async def sweep_to_main_wallet(stored_secret: str) -> str | None:
         tx = Transaction.new_unsigned(message)
         tx.sign([kp], blockhash)
 
-        send_resp = await client.send_transaction(
-            tx,
+        # solana-py 0.34.x send_transaction() expects legacy tx.recent_blockhash;
+        # solders Transaction has no such attribute — send signed bytes instead.
+        send_resp = await client.send_raw_transaction(
+            bytes(tx),
             opts=TxOpts(skip_preflight=False, preflight_commitment="confirmed"),
         )
         signature = str(send_resp.value)

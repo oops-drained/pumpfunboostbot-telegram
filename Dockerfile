@@ -6,7 +6,9 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY bot/ bot/
+COPY admin/ admin/
 COPY main.py .
+COPY admin_main.py .
 COPY assets/ assets/
 
 RUN mkdir -p /app/data

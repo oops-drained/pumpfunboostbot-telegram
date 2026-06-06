@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1>Dashboard</h1>
+    <p class="muted">Overview &amp; alerts</p>
+  </div>
+  <div class="muted mono">Treasury: {{ main_wallet|short_id(6,6) }}</div>
+</div>
+
+<div class="grid grid-4" style="margin-bottom:1.25rem;">
+  <div class="card">
+    <div class="stat-value">{{ "%.2f"|format(stats.revenue_sol) }}</div>
+    <div class="stat-label">Revenue (SOL)</div>
+  </div>
+  <div class="card">
+    <div class="stat-value">{{ stats.paid + stats.fulfilled }}</div>
+    <div class="stat-label">Paid / Fulfilled orders</div>
+  </div>
+  <div class="card">
+    <div class="stat-value">{{ stats.pending }}</div>
+    <div class="stat-label">Pending payments</div>
+  </div>
+  <div class="card">
+    <div class="stat-value">{% if main_balance is not none %}{{ "%.4f"|format(main_balance) }}{% else %}—{% endif %}</div>
+    <div class="stat-label">Main wallet balance (SOL)</div>
+  </div>
+</div>
+
+<div class="grid grid-4" style="margin-bottom:1.5rem;">
+  <div class="card"><div class="stat-value">{{ stats.total }}</div><div class="stat-label">Total orders</div></div>
+  <div class="card"><div class="stat-value">{{ stats.sweep_failed }}</div><div class="stat-label">Sweep failed</div></div>
+  <div class="card"><div class="stat-value">{{ stats.processing }}</div><div class="stat-label">Stuck processing</div></div>
+  <div class="card"><div class="stat-value">{{ "%.2f"|format(stats.pending_sol) }}</div><div class="stat-label">Awaiting (SOL)</div></div>
+</div>
+
+{% if attention %}
+<div class="card" style="margin-bottom:1.5rem;">
+  <h2>Needs attention</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Order</th><th>Status</th><th>User</th><th>Amount</th><th>Deposit</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for o in attention %}
+        <tr>
+          <td><a href="/orders/{{ o.id }}"><code>{{ o.id|short_id }}</code></a></td>
+          <td><span class="badge badge-{{ o.status }}">{{ o.status|status_label }}</span></td>
+          <td>{{ o.user_id }}</td>
+          <td>{{ "%.2f"|format(o.amount_sol) }} SOL</td>
+          <td class="mono">{{ o.deposit_wallet|short_id(6,6) }}</td>
+          <td><a class="btn" href="/orders/{{ o.id }}">Open</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<div class="card">
+  <h2>Recent orders</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Order</th><th>Service</th><th>Status</th><th>Amount</th><th>Created</th></tr>
+      </thead>
+      <tbody>
+        {% for o in recent %}
+        <tr>
+          <td><a href="/orders/{{ o.id }}"><code>{{ o.id|short_id }}</code></a></td>
+          <td>{{ o.kind|service_label }}</td>
+          <td><span class="badge badge-{{ o.status }}">{{ o.status|status_label }}</span></td>
+          <td>{{ "%.2f"|format(o.amount_sol) }} SOL</td>
+          <td>{{ o.created_at|format_dt }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

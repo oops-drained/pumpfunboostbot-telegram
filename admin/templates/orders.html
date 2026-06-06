@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Orders{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1>Orders</h1>
+    <p class="muted">{{ total }} total</p>
+  </div>
+</div>
+
+<form class="filters" method="get" action="/orders">
+  <select name="status">
+    <option value="">All statuses</option>
+    {% for s in statuses %}
+    <option value="{{ s }}" {% if status_filter == s %}selected{% endif %}>{{ s|status_label }}</option>
+    {% endfor %}
+  </select>
+  <input name="q" value="{{ q }}" placeholder="Search ID, user, CA, token, wallet…" style="min-width:260px;">
+  <button class="btn" type="submit">Filter</button>
+  <a class="btn" href="/orders">Reset</a>
+</form>
+
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Order</th><th>User</th><th>Service</th><th>Package</th>
+          <th>Token</th><th>Amount</th><th>Status</th><th>Created</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in orders %}
+        <tr>
+          <td><a href="/orders/{{ o.id }}"><code>{{ o.id|short_id }}</code></a></td>
+          <td>{{ o.user_id }}</td>
+          <td>{{ o.kind|service_label }}</td>
+          <td>{{ o.package_name }}</td>
+          <td>{{ o.token_symbol or o.token_name or '—' }}</td>
+          <td>{{ "%.2f"|format(o.amount_sol) }} SOL</td>
+          <td><span class="badge badge-{{ o.status }}">{{ o.status|status_label }}</span></td>
+          <td>{{ o.created_at|format_dt }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" class="muted">No orders found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if pages > 1 %}
+  <div class="pager">
+    {% if page > 1 %}
+    <a class="btn" href="/orders?page={{ page - 1 }}&status={{ status_filter }}&q={{ q }}">← Prev</a>
+    {% endif %}
+    <span class="muted">Page {{ page }} / {{ pages }}</span>
+    {% if page < pages %}
+    <a class="btn" href="/orders?page={{ page + 1 }}&status={{ status_filter }}&q={{ q }}">Next →</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

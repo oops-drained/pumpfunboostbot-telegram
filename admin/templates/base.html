@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Admin{% endblock %} · Pump Boost</title>
+  <link rel="stylesheet" href="/static/admin.css">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">Pump Boost Admin</div>
+      <nav class="nav">
+        <a href="/" class="{% if active == 'dashboard' %}active{% endif %}">Dashboard</a>
+        <a href="/orders" class="{% if active == 'orders' %}active{% endif %}">Orders</a>
+        <a href="/wallets" class="{% if active == 'wallets' %}active{% endif %}">Wallets</a>
+      </nav>
+      <form action="/logout" method="post" style="margin-top:2rem;">
+        <button class="btn" type="submit">Logout</button>
+      </form>
+    </aside>
+    <main class="content">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</body>
+</html>
